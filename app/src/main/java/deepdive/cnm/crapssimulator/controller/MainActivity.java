@@ -20,7 +20,6 @@ import java.util.concurrent.Executors;
 
 public class MainActivity extends AppCompatActivity {
 
-  private static ExecutorService executor = Executors.newSingleThreadExecutor();
   private Boolean running = false;
   private Game game;
   private Random rng;
@@ -72,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
         resetGame();
         break;
       case R.id.fast_forward:
-        executor.execute(new Runner());
+        new Runner().start();
         invalidateOptionsMenu();
         running = true;
         break;
@@ -97,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
     updateDisplay(null,0,0,0);
   }
 
-  private class Runner implements Runnable{
+  private class Runner extends Thread{
 
     private int plays;
     private int wins;
@@ -114,20 +113,16 @@ public class MainActivity extends AppCompatActivity {
           wins = game.getWins();
           plays = game.getPlays();
           percentage = game.getPercentage();
-          runOnUiThread(()->{
-            updateDisplay(round, wins, plays, percentage);
-          });
+          runOnUiThread(new Updater(round,wins,plays,percentage));
         }
 
       }
       wins = game.getWins();
       plays = game.getPlays();
       percentage = game.getPercentage();
-      runOnUiThread(()->{
-        updateDisplay(round, wins, plays, percentage);
-      });
-
+      runOnUiThread(new Updater(round,wins,plays,percentage));
       invalidateOptionsMenu();
+
     }
   }
 
@@ -147,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void run() {
-
+      updateDisplay(round,wins,plays,percentage);
 
     }
   }

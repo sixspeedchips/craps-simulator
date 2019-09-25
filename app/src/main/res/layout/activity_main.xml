@@ -19,15 +19,6 @@
     app:layout_constraintBottom_toTopOf="@id/tally"/>
 
 
-<!--  <TextView-->
-<!--    android:id="@+id/tally"-->
-<!--    android:layout_width="wrap_content"-->
-<!--    android:layout_height="wrap_content"-->
-<!--    style="@style/Tally"-->
-<!--    app:layout_constraintBottom_toBottomOf="parent"-->
-<!--    app:layout_constraintEnd_toEndOf="parent"-->
-<!--    app:layout_constraintStart_toStartOf="parent"/>-->
-
   <TextView
     android:id="@+id/tally"
     android:layout_width="wrap_content"
@@ -37,18 +28,5 @@
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
     />
-
-<!--  <TextView-->
-<!--    android:layout_width="wrap_content"-->
-<!--    android:layout_height="wrap_content"-->
-<!--    android:text="@string/hello_world"-->
-<!--    android:textColor="#0ff0ff"-->
-<!--    android:textSize="20pt"-->
-<!--    app:layout_constraintBottom_toBottomOf="parent"-->
-<!--    app:layout_constraintLeft_toLeftOf="parent"-->
-<!--    app:layout_constraintRight_toRightOf="parent"-->
-<!--    android:id="@+id/hello_world"-->
-<!--    app:layout_constraintTop_toTopOf="parent"/>-->
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

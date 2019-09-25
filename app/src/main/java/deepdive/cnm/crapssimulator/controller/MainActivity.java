@@ -88,7 +88,10 @@ public class MainActivity extends AppCompatActivity {
 
   private void updateDisplay(Round round, int wins, int plays, double percentage) {
     adapter.add(round);
-    tally.setText(getString(R.string.tally_format, wins, plays, 100 * percentage));
+    String winsLabel = getResources().getQuantityString(R.plurals.wins,wins);
+    String playsLabel = getResources().getQuantityString(R.plurals.plays,plays);
+
+    tally.setText(getString(R.string.tally_format, wins, plays, 100 * percentage,winsLabel,playsLabel));
   }
 
   private void resetGame(){
@@ -98,29 +101,22 @@ public class MainActivity extends AppCompatActivity {
 
   private class Runner extends Thread{
 
-    private int plays;
-    private int wins;
-    private double percentage;
-    private Round round;
 
     @Override
     public void run() {
 
       while (running){
-        round = game.play();
+        Round round = game.play();
 
         if(game.getPlays() % 500000 == 0){
-          wins = game.getWins();
-          plays = game.getPlays();
-          percentage = game.getPercentage();
+          int wins = game.getWins();
+          int plays = game.getPlays();
+          double percentage = game.getPercentage();
           runOnUiThread(new Updater(round,wins,plays,percentage));
         }
 
       }
-      wins = game.getWins();
-      plays = game.getPlays();
-      percentage = game.getPercentage();
-      runOnUiThread(new Updater(round,wins,plays,percentage));
+      runOnUiThread(new Updater(game.play(),game.getWins(),game.getPlays(),game.getPercentage()));
       invalidateOptionsMenu();
 
     }

@@ -1,10 +1,12 @@
 <resources>
   <string name="app_name">Craps Simulator</string>
   <string name="hello_world">Hello world</string>
-  <string name="run">Run</string>
+  <string name="play_one">Play one round</string>
   <string name="reset">Reset</string>
   <string name="run_toast">The run option was selected</string>
   <string name="reset_toast">The reset option was selected</string>
   <string name="tally_format">%1$d wins / %2$d plays  = %3$.2f%%</string>
   <string name="value_format"> = %d</string>
+  <string name="fast_forward">Fast Forward</string>
+  <string name="pause">Pause</string>
 </resources>

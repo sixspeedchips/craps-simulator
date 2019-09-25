@@ -2,10 +2,23 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:app="http://schemas.android.com/apk/res-auto">
 
-  <item android:title="@string/run"
-    android:icon="@drawable/ic_play"
-    app:showAsAction="ifRoom"
-    android:id="@+id/run"
+  <item android:title="@string/play_one"
+    android:icon="@drawable/ic_play_one"
+    app:showAsAction="always"
+    android:id="@+id/play_one"
+    />
+
+  <item android:title="@string/fast_forward"
+    android:icon="@drawable/ic_fast_forward"
+    android:id="@+id/fast_forward"
+    app:showAsAction="always"
+    />
+
+  <item android:title="@string/pause"
+    android:icon="@drawable/ic_pause"
+    android:visible="false"
+    android:id="@+id/pause"
+    app:showAsAction="always"
     />
 
   <item android:title="@string/reset"

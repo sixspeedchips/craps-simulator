@@ -13,9 +13,6 @@ import deepdive.cnm.crapssimulator.view.RoundAdapter;
 import edu.cnm.deepdive.craps.model.Game;
 import edu.cnm.deepdive.craps.model.Game.Round;
 import java.util.Random;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -65,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
     boolean handled = true;
     switch (item.getItemId()) {
       case R.id.play_one:
-        updateDisplay(game.play(),game.getWins(),game.getLosses(),game.getPercentage());
+        updateDisplay(game.play(),game.getWins(),game.getPlays(),game.getPercentage());
         break;
       case R.id.reset:
         resetGame();
@@ -108,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
       while (running){
         Round round = game.play();
 
-        if(game.getPlays() % 500000 == 0){
+        if(game.getPlays() % 10000 == 0){
           int wins = game.getWins();
           int plays = game.getPlays();
           double percentage = game.getPercentage();

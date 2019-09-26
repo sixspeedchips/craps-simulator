@@ -1,5 +1,7 @@
 package deepdive.cnm.crapssimulator.view;
 
+import static edu.cnm.deepdive.craps.model.Game.State.WIN;
+
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
@@ -9,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+import androidx.annotation.ColorInt;
 import androidx.core.content.ContextCompat;
 import deepdive.cnm.crapssimulator.R;
 import edu.cnm.deepdive.craps.model.Game.Roll;
@@ -17,11 +20,16 @@ import edu.cnm.deepdive.craps.model.Game.State;
 
 public class RoundAdapter extends ArrayAdapter<Roll> {
 
-  private Drawable[] faces;
+  final private Drawable[] faces;
   private State state;
+  @ColorInt final private int winningRound;
+  @ColorInt final private int losingRound;
+
 
   public RoundAdapter(Context context) {
     super(context, R.layout.single_roll);
+    this.winningRound = ContextCompat.getColor(context,R.color.winningRound);
+    this.losingRound = ContextCompat.getColor(context,R.color.losingRound);
     Resources res = context.getResources();
     String pkg = context.getPackageName();
     faces = new Drawable[6];
@@ -39,6 +47,7 @@ public class RoundAdapter extends ArrayAdapter<Roll> {
     } else {
       this.state = null;
     }
+
   }
 
   @Override
@@ -54,6 +63,7 @@ public class RoundAdapter extends ArrayAdapter<Roll> {
     ((ImageView) view.findViewById(R.id.die2)).setImageDrawable(faces[die2 - 1]);
     ((TextView) view.findViewById(R.id.value)).setText(
         getContext().getString(R.string.value_format, value));
+    view.setBackgroundColor(state == WIN ? winningRound:losingRound);
     return view;
   }
 

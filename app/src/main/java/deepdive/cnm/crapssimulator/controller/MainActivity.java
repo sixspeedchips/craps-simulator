@@ -8,35 +8,45 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
+import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.ViewModelProviders;
 import deepdive.cnm.crapssimulator.R;
 import deepdive.cnm.crapssimulator.view.RoundAdapter;
+import deepdive.cnm.crapssimulator.viewmodel.MainViewModel;
 import edu.cnm.deepdive.craps.model.Game;
 import edu.cnm.deepdive.craps.model.Game.Round;
-import java.util.Random;
 
 
 public class MainActivity extends AppCompatActivity {
 
-  private Boolean running = false;
-  private Game game;
-  private Random rng;
+  private MainViewModel viewModel;
   private RoundAdapter adapter;
   private TextView tally;
-  private ListView rolls;
+  private Boolean running = false;
+
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
 
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
+    setupUI();
+    setupViewModel();
+  }
+
+  private void setupViewModel() {
+    viewModel = ViewModelProviders.of(this).get(MainViewModel.class);
+    viewModel.getGame().observe(this, this::updateTally);
+    viewModel.getRound().observe(this,this::updateRolls);
+    viewModel.isRunning().observe(this,(running)->this.running = running);
+  }
+
+
+  private void setupUI() {
     tally = findViewById(R.id.tally);
-    rolls = findViewById(R.id.rolls);
+    ListView rolls = findViewById(R.id.rolls);
     adapter = new RoundAdapter(this);
     rolls.setAdapter(adapter);
-    rng = new Random();
-    resetGame();
-
-
   }
 
   @Override
@@ -62,18 +72,19 @@ public class MainActivity extends AppCompatActivity {
     boolean handled = true;
     switch (item.getItemId()) {
       case R.id.play_one:
-        updateDisplay(game.play(),game.getWins(),game.getPlays(),game.getPercentage());
+        viewModel.playOne();
         break;
       case R.id.reset:
-        resetGame();
+        viewModel.reset();
         break;
       case R.id.fast_forward:
-        new Runner().start();
         invalidateOptionsMenu();
-        running = true;
+        viewModel.fastForward();
         break;
       case R.id.pause:
-        running = false;
+        viewModel.pause();
+        invalidateOptionsMenu();
+
         break;
       default:
         handled = super.onOptionsItemSelected(item);
@@ -83,61 +94,23 @@ public class MainActivity extends AppCompatActivity {
     return handled;
   }
 
-  private void updateDisplay(Round round, int wins, int plays, double percentage) {
+
+  private void updateRolls(Round round) {
     adapter.add(round);
+  }
+  private void updateTally(Game game){
+
+    int wins = game.getWins();
+    int plays = game.getPlays();
+    double percentage = game.getPercentage();
+
     String winsLabel = getResources().getQuantityString(R.plurals.wins,wins);
     String playsLabel = getResources().getQuantityString(R.plurals.plays,plays);
 
     tally.setText(getString(R.string.tally_format, wins, plays, 100 * percentage,winsLabel,playsLabel));
+
   }
 
-  private void resetGame(){
-    game = new Game(rng);
-    updateDisplay(null,0,0,0);
-  }
 
-  private class Runner extends Thread{
-
-
-    @Override
-    public void run() {
-
-      while (running){
-        Round round = game.play();
-
-        if(game.getPlays() % 10000 == 0){
-          int wins = game.getWins();
-          int plays = game.getPlays();
-          double percentage = game.getPercentage();
-          runOnUiThread(new Updater(round,wins,plays,percentage));
-        }
-
-      }
-      runOnUiThread(new Updater(game.play(),game.getWins(),game.getPlays(),game.getPercentage()));
-      invalidateOptionsMenu();
-
-    }
-  }
-
-  private class Updater implements Runnable{
-
-    private final Round round;
-    private final int wins;
-    private final int plays;
-    private final double percentage;
-
-    public Updater(Round round, int wins, int plays, double percentage) {
-      this.round = round;
-      this.wins = wins;
-      this.plays = plays;
-      this.percentage = percentage;
-    }
-
-    @Override
-    public void run() {
-      updateDisplay(round,wins,plays,percentage);
-
-    }
-  }
 
 }

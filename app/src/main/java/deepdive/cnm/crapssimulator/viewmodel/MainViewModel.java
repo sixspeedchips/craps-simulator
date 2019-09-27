@@ -8,53 +8,91 @@ import androidx.lifecycle.MutableLiveData;
 import edu.cnm.deepdive.craps.model.Game;
 import edu.cnm.deepdive.craps.model.Game.Round;
 import java.security.SecureRandom;
-import java.util.Objects;
 import java.util.Random;
 
 public class MainViewModel extends AndroidViewModel {
 
-  final private Random rng;
-  final private MutableLiveData<Game> game;
-  final private MutableLiveData<Round> round;
+  private final Random rng;
+  private final MutableLiveData<Game> game;
+  private final MutableLiveData<Round> round;
+  private final MutableLiveData<Boolean> running;
+  private Runner runner;
 
   public MainViewModel(@NonNull Application application) {
     super(application);
     rng = new SecureRandom();
     game = new MutableLiveData<>();
     round = new MutableLiveData<>();
-
-    round.setValue(null);
-    game.setValue(new Game(rng));
+    running = new MutableLiveData<>();
+    reset();
   }
 
-  public LiveData<Game> getGame(){
+  public LiveData<Game> getGame() {
     return game;
   }
 
-  public LiveData<Round> getRound(){
+  public LiveData<Round> getRound() {
     return round;
   }
 
-  public void play(){
-    round.setValue(Objects.requireNonNull(game.getValue()).play());
-
+  public LiveData<Boolean> isRunning() {
+    return running;
   }
 
-  public void play(int rounds){
-    //TODO start runner thread to play
-    new Thread(()->{
-      Round round = null;
-      for (int i = 0; i < rounds; i++) {
-        round = Objects.requireNonNull(game.getValue()).play();
-      }
-      MainViewModel.this.round.postValue(round);
-    }).start();
-
+  public void playOne() {
+    round.setValue(game.getValue().play());
+    game.setValue(game.getValue());
   }
 
-  public void reset(){
-    Objects.requireNonNull(game.getValue()).reset();
+  public void fastForward() {
+    running.setValue(true);
+    pause();
+    runner = new Runner();
+    runner.start();
+  }
+
+  public void pause() {
+    if ( runner != null){
+      runner.pause();
+    }
+    runner = null;
+  }
+
+  public void reset() {
+    game.setValue(new Game(rng));
     round.setValue(null);
+    running.setValue(false);
+  }
+
+  private class Runner extends Thread {
+
+    private static final int ROUND_BATCH_SIZE = 1000;
+
+    private boolean running = true;
+
+
+    @Override
+    public void run() {
+
+      Game game = MainViewModel.this.game.getValue();
+
+      while (running){
+        int limit = ROUND_BATCH_SIZE - game.getPlays() % ROUND_BATCH_SIZE;
+        Round round = null;
+        for (int i = 0; i < limit; i++) {
+          round = game.play();
+        }
+        MainViewModel.this.round.postValue(round);
+        MainViewModel.this.game.postValue(game);
+      }
+      MainViewModel.this.running.postValue(false);
+    }
+
+    public void pause(){
+      running = false;
+    }
+
+
   }
 
 }

@@ -8,6 +8,7 @@
   <string name="value_format"> = %d</string>
   <string name="fast_forward">Fast Forward</string>
   <string name="pause">Pause</string>
+  <string name="slow_down">Slow Down</string>
   <plurals name="wins">
     <item quantity="one">win</item>
     <item quantity="other">wins</item>

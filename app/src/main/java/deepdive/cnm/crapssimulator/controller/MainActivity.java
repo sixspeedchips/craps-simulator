@@ -60,9 +60,7 @@ public class MainActivity extends AppCompatActivity {
   public boolean onPrepareOptionsMenu(Menu menu) {
     super.onPrepareOptionsMenu(menu);
     menu.findItem(R.id.play_one).setVisible(!running);
-    menu.findItem(R.id.fast_forward).setVisible(!running);
     menu.findItem(R.id.pause).setVisible(running);
-    menu.findItem(R.id.reset).setEnabled(!running);
     return true;
 
   }
@@ -71,6 +69,10 @@ public class MainActivity extends AppCompatActivity {
   public boolean onOptionsItemSelected(@NonNull MenuItem item) {
     boolean handled = true;
     switch (item.getItemId()) {
+      case R.id.slow_down:
+        invalidateOptionsMenu();
+        viewModel.slowDown();
+        break;
       case R.id.play_one:
         viewModel.playOne();
         break;

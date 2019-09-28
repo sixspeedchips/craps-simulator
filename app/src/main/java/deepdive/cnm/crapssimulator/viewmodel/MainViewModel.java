@@ -9,6 +9,9 @@ import edu.cnm.deepdive.craps.model.Game;
 import edu.cnm.deepdive.craps.model.Game.Round;
 import java.security.SecureRandom;
 import java.util.Random;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class MainViewModel extends AndroidViewModel {
 
@@ -16,7 +19,11 @@ public class MainViewModel extends AndroidViewModel {
   private final MutableLiveData<Game> game;
   private final MutableLiveData<Round> round;
   private final MutableLiveData<Boolean> running;
+  private final long baseTime;
   private Runner runner;
+  private long timeStep;
+  private ScheduledExecutorService es =
+      Executors.newSingleThreadScheduledExecutor();
 
   public MainViewModel(@NonNull Application application) {
     super(application);
@@ -24,6 +31,9 @@ public class MainViewModel extends AndroidViewModel {
     game = new MutableLiveData<>();
     round = new MutableLiveData<>();
     running = new MutableLiveData<>();
+    baseTime = 1000000;
+    timeStep = baseTime;
+    runner = new Runner();
     reset();
   }
 
@@ -44,18 +54,29 @@ public class MainViewModel extends AndroidViewModel {
     game.setValue(game.getValue());
   }
 
+  public void slowDown(){
+    running.setValue(true);
+    timeStep *= 2;
+    es.shutdown();
+    es = Executors.newSingleThreadScheduledExecutor();
+    es.scheduleAtFixedRate(runner,0,timeStep,TimeUnit.MICROSECONDS);
+
+  }
   public void fastForward() {
     running.setValue(true);
-    pause();
-    runner = new Runner();
-    runner.start();
+    es.shutdown();
+    es = Executors.newSingleThreadScheduledExecutor();
+    if(timeStep>1){
+      es.scheduleAtFixedRate(runner,0, timeStep, TimeUnit.MICROSECONDS);
+      timeStep /= (timeStep / 2 > 1) ? 2 : 1;
+
+    }
   }
 
   public void pause() {
-    if ( runner != null){
-      runner.pause();
-    }
-    runner = null;
+    timeStep = baseTime;
+    running.setValue(false);
+    es.shutdown();
   }
 
   public void reset() {
@@ -64,32 +85,14 @@ public class MainViewModel extends AndroidViewModel {
     running.setValue(false);
   }
 
-  private class Runner extends Thread {
-
-    private static final int ROUND_BATCH_SIZE = 1000;
-
-    private boolean running = true;
+  private class Runner implements Runnable {
 
 
     @Override
     public void run() {
-
       Game game = MainViewModel.this.game.getValue();
-
-      while (running){
-        int limit = ROUND_BATCH_SIZE - game.getPlays() % ROUND_BATCH_SIZE;
-        Round round = null;
-        for (int i = 0; i < limit; i++) {
-          round = game.play();
-        }
-        MainViewModel.this.round.postValue(round);
-        MainViewModel.this.game.postValue(game);
-      }
-      MainViewModel.this.running.postValue(false);
-    }
-
-    public void pause(){
-      running = false;
+      MainViewModel.this.round.postValue(game.play());
+      MainViewModel.this.game.postValue(game);
     }
 
 
